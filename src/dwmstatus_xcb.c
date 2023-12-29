@@ -24,9 +24,10 @@ void sigint_handler()
 int main()
 {
 	/* format the uptime into minutes */
-	unsigned int up_minutes, up_hours, volume;
+	unsigned int up_minutes, up_hours;
+	double volume;
 	char *battery_status, *system_time;
-	long uptime, alsa_vol_unit, alsa_max_vol, volume_sementara;
+	long uptime, alsa_vol_unit, alsa_max_vol;
 	static char status[100];
 	struct sysinfo s_info;
 
@@ -46,10 +47,7 @@ int main()
 
 	snd_mixer_t *alsa_handle = create_alsa_handle();
 	alsa_max_vol = alsa_get_max_vol(alsa_handle); // 65536
-	//volume = alsa_volume(alsa_handle) / alsa_max_vol;
-	//alsa_vol_unit = alsa_get_max_vol(alsa_handle) / 100;
-	//volume = alsa_volume_percent(alsa_handle, alsa_vol_unit);
-	volume = ceil((alsa_volume(alsa_handle) / alsa_max_vol) * 100);
+	volume = ((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100;
 
 	/* use a counter to update less important info less often */
 	unsigned int counter = STATUS_REFRESH_RATE_LOW;
@@ -58,11 +56,9 @@ int main()
 			snd_mixer_handle_events(alsa_handle);
 			// 26/12/23 ;; volume = alsa_volume(alsa_handle); // 5% = 3276 ???
 			// 28/12/23 :: ternyata harus pake rumus persen '-'
-			volume = ceil((alsa_volume(alsa_handle) / alsa_max_vol) * 100);
-			volume_sementara = alsa_volume(alsa_handle);
-			volume_sementara = (volume_sementara / alsa_max_vol);
-			printf("kalkulasi => %d / %d\n", alsa_volume(alsa_handle), alsa_max_vol);
-			printf("volume audio : %d\n", volume_sementara);
+			volume = ceil((int)(((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100));
+			printf("volume : %f\n",((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100);
+			printf("volume aktual : %f\n", ceil((int)round(volume)));
 		}
 
 		if (counter >= STATUS_REFRESH_RATE_LOW) {
@@ -85,8 +81,8 @@ int main()
 		}
 
 		snprintf(status, sizeof(status),
-			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%02d \u2502 %s ",
-			network_status(), cpufreq(), cputemp(), battery_status, volume_sementara, up_hours, up_minutes, system_time);
+			" %s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %f \u2502 %d:%02d \u2502 %s ",
+			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,
