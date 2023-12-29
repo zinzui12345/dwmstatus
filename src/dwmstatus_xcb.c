@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
+#include <math.h>
 
 #include <alsa/asoundlib.h>
 #include <alsa/mixer.h>
@@ -25,7 +26,7 @@ int main()
 	/* format the uptime into minutes */
 	unsigned int up_minutes, up_hours, volume;
 	char *battery_status, *system_time;
-	long uptime, alsa_vol_unit;
+	long uptime, alsa_vol_unit, alsa_max_vol, volume_sementara;
 	static char status[100];
 	struct sysinfo s_info;
 
@@ -44,15 +45,24 @@ int main()
 		root_window = screen->root;
 
 	snd_mixer_t *alsa_handle = create_alsa_handle();
-	alsa_vol_unit = alsa_get_max_vol(alsa_handle) / 100;
-	volume = alsa_volume_percent(alsa_handle, alsa_vol_unit);
+	alsa_max_vol = alsa_get_max_vol(alsa_handle); // 65536
+	//volume = alsa_volume(alsa_handle) / alsa_max_vol;
+	//alsa_vol_unit = alsa_get_max_vol(alsa_handle) / 100;
+	//volume = alsa_volume_percent(alsa_handle, alsa_vol_unit);
+	volume = ceil((alsa_volume(alsa_handle) / alsa_max_vol) * 100);
 
 	/* use a counter to update less important info less often */
 	unsigned int counter = STATUS_REFRESH_RATE_LOW;
 	while (keep_running) {
 		if (snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000) == 0) {
 			snd_mixer_handle_events(alsa_handle);
-			volume = alsa_get_max_vol(alsa_handle) / 100;
+			// 26/12/23 ;; volume = alsa_volume(alsa_handle); // 5% = 3276 ???
+			// 28/12/23 :: ternyata harus pake rumus persen '-'
+			volume = ceil((alsa_volume(alsa_handle) / alsa_max_vol) * 100);
+			volume_sementara = alsa_volume(alsa_handle);
+			volume_sementara = (volume_sementara / alsa_max_vol);
+			printf("kalkulasi => %d / %d\n", alsa_volume(alsa_handle), alsa_max_vol);
+			printf("volume audio : %d\n", volume_sementara);
 		}
 
 		if (counter >= STATUS_REFRESH_RATE_LOW) {
@@ -76,7 +86,7 @@ int main()
 
 		snprintf(status, sizeof(status),
 			"%s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %d \u2502 %d:%02d \u2502 %s ",
-			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
+			network_status(), cpufreq(), cputemp(), battery_status, volume_sementara, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,

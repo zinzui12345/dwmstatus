@@ -4,7 +4,7 @@
 #define STATUS_REFRESH_RATE_LOW	30
 
 /* File indicating AC is present */
-#define AC_FILE		"/sys/class/power_supply/AC/online"
+#define AC_FILE		"/sys/class/power_supply/AC0/online"
 
 /* Directory for battery presence */
 #define BAT_DIR		"/sys/class/power_supply/BAT0"
@@ -19,15 +19,15 @@
 #define CPU_FREQFILE	"/sys/devices/system/cpu/cpufreq/policy0/scaling_cur_freq"
 
 /* File with current temperature of first core */
-#define CPU_TEMPFILE	"/sys/devices/platform/coretemp.0/hwmon/hwmon0/temp1_input"
+#define CPU_TEMPFILE	"/sys/class/thermal/thermal_zone0/temp"
 
 /* File with current connectivity status of (wired) network interface */
 #define ETH_CARFILE	"/sys/class/net/enp3s0/carrier"
 
 /* File with current connectivity status of (wireless) network interface */
-#define WLAN_CARFILE	"/sys/class/net/wlp5s0/carrier"
+#define WLAN_CARFILE	"/sys/class/net/wlp2s0/carrier"
 
 /* Which sound card volume to display */
 #define SOUNDCARD	"default"
 
-#define SOUNDCONTROL	"Master"
+#define SOUNDCONTROL	"Master" /* Master */
