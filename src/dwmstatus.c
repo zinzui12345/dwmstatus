@@ -37,7 +37,7 @@ char *network_status()
 	if ((carrier_fd = fopen(WLAN_CARFILE, "r"))) {
 		if (fgetc(carrier_fd) == '1') {
 			fclose(carrier_fd);
-			return "<--->";
+			return "\uf1eb";
 		}
 		fclose(carrier_fd);
 	}
@@ -45,11 +45,11 @@ char *network_status()
 	if ((carrier_fd = fopen(ETH_CARFILE, "r"))) {
 		if (fgetc(carrier_fd) == '1') {
 			fclose(carrier_fd);
-			return "[---]";
+			return "\uf233";
 		}
 		fclose(carrier_fd);
 	}
-	return "--/--";
+	return "\uf2d3";
 }
 
 /**
