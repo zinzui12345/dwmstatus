@@ -7,7 +7,7 @@ Exports status bar to X11 root window via xcb instead of xlib
 Output:
 ```
 /* charging */
-<---> │ 0.94GHz │ 39°C │ [100%+] │ Vol: 50% │ 1:09 │ Thu 10/29  4:20
+<---> │ 0.94GHz │ \uf2ca 39°C │ \uf242 100%+ │ \uf028 50% │ \uf253 1:09 │ \uf073 Thu 10/29  4:20
 /* discharging */
 <---> │ 0.94GHz │ 39°C │ [99%] │ Vol: 50% │ 1:69 │ Thu 10/29  4:20
 /* AC power */
