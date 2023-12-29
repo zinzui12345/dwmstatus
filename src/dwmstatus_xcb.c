@@ -19,13 +19,17 @@ void sigint_handler()
 {
 	keep_running = 0;
 }
-
+int bulatkan(double angka){
+	double potong_akhir = ceil((int)angka);    // 4.0
+	double sisa_potong = angka - potong_akhir; // 4.8 - 4.0 = 0.8
+	if (sisa_potong <= 0.5){ return (int)potong_akhir; }
+	else { return (int)(potong_akhir + 1.0);           }
+}
 
 int main()
 {
 	/* format the uptime into minutes */
-	unsigned int up_minutes, up_hours;
-	double volume;
+	unsigned int up_minutes, up_hours, volume;
 	char *battery_status, *system_time;
 	long uptime, alsa_vol_unit, alsa_max_vol;
 	static char status[100];
@@ -47,7 +51,9 @@ int main()
 
 	snd_mixer_t *alsa_handle = create_alsa_handle();
 	alsa_max_vol = alsa_get_max_vol(alsa_handle); // 65536
-	volume = ((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100;
+	//volume = ceil((int)(((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100));
+	volume = 9999;
+	
 
 	/* use a counter to update less important info less often */
 	unsigned int counter = STATUS_REFRESH_RATE_LOW;
@@ -56,9 +62,10 @@ int main()
 			snd_mixer_handle_events(alsa_handle);
 			// 26/12/23 ;; volume = alsa_volume(alsa_handle); // 5% = 3276 ???
 			// 28/12/23 :: ternyata harus pake rumus persen '-'
-			volume = ceil((int)(((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100));
-			printf("volume : %f\n",((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100);
-			printf("volume aktual : %f\n", ceil((int)round(volume)));
+			//volume = ((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100;
+			volume = bulatkan(((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100);
+			//printf("volume : %f\n",((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100);
+			//printf("volume aktual : %d\n", bulatkan(volume));
 		}
 
 		if (counter >= STATUS_REFRESH_RATE_LOW) {
@@ -81,7 +88,7 @@ int main()
 		}
 
 		snprintf(status, sizeof(status),
-			" %s \u2502 %0.02fGHz \u2502 %u\u00B0C \u2502 [%s] \u2502 vol: %f \u2502 %d:%02d \u2502 %s ",
+			" %s \u2502 %0.02fGHz \u2502 \uf2ca %u\u00B0C \u2502 \uf242  %s \u2502 \uf028 %d \u2502 \uf253 %d:%02d \u2502 \uf073 %s ",
 			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
@@ -107,6 +114,7 @@ int main()
 
 	return 0;
 }
+
 
 //		printf("%s \u2502 %uMB \u2502 %u°C \u2502 [%u%%] \u2502 %s \n",
 //			get_net_carrier(), get_meminfo(), get_temp(), battery_life, unixtime());
