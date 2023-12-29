@@ -30,7 +30,7 @@ int main()
 {
 	/* format the uptime into minutes */
 	unsigned int up_minutes, up_hours, volume;
-	char *battery_status, *system_time;
+	char *battery_status, *system_time, *battery_icon;
 	long uptime, alsa_vol_unit, alsa_max_vol;
 	static char status[100];
 	struct sysinfo s_info;
@@ -50,8 +50,7 @@ int main()
 		root_window = screen->root;
 
 	snd_mixer_t *alsa_handle = create_alsa_handle();
-	alsa_max_vol = alsa_get_max_vol(alsa_handle); // 65536
-	//volume = ceil((int)(((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100));
+	alsa_max_vol = alsa_get_max_vol(alsa_handle);
 	volume = 9999;
 	
 
@@ -82,14 +81,21 @@ int main()
 
 			/* get the battery life */
 			battery_status = power_status();
+			if      (atoi(battery_status) < 10)   { battery_icon = "\uf244"; }
+			else if (atoi(battery_status) <= 25)  { battery_icon = "\uf243"; }
+			else if (atoi(battery_status) <= 50)  { battery_icon = "\uf242"; }
+			else if (atoi(battery_status) <= 75)  { battery_icon = "\uf241"; }
+			else if (atoi(battery_status) <= 100) { battery_icon = "\uf240"; }
+			else				      { battery_icon = "\uf0e7"; }
 
 			/* get the system time */
 			system_time = unixtime();
 		}
 
 		snprintf(status, sizeof(status),
-			" %s \u2502 %0.02fGHz \u2502 \uf2ca %u\u00B0C \u2502 \uf242  %s \u2502 \uf028 %d \u2502 \uf253 %d:%02d \u2502 \uf073 %s ",
-			network_status(), cpufreq(), cputemp(), battery_status, volume, up_hours, up_minutes, system_time);
+			// net	    freq		   temp		bat_icn bat_percent	  vol	       up_hrs up_min		datetime
+			" %s \u2502 %0.02fGHz \u2502 \uf2ca %u\u00B0C \u2502 %s  %s \u2502 \uf028 %d \u2502 \uf253 %d:%02d \u2502 \uf073 %s ",
+			network_status(), cpufreq(), cputemp(), battery_icon, battery_status, volume, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,
