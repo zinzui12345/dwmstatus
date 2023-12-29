@@ -29,8 +29,9 @@ int bulatkan(double angka){
 int main()
 {
 	/* format the uptime into minutes */
+	int hourglass_icon_index = 1;
 	unsigned int up_minutes, up_hours, volume;
-	char *battery_status, *system_time, *battery_icon;
+	char *battery_status, *system_time, *battery_icon, *hourglass_icon = "\uf254";
 	long uptime, alsa_vol_unit, alsa_max_vol;
 	static char status[100];
 	struct sysinfo s_info;
@@ -59,12 +60,15 @@ int main()
 	while (keep_running) {
 		if (snd_mixer_wait(alsa_handle, STATUS_REFRESH_RATE_REG * 1000) == 0) {
 			snd_mixer_handle_events(alsa_handle);
-			// 26/12/23 ;; volume = alsa_volume(alsa_handle); // 5% = 3276 ???
-			// 28/12/23 :: ternyata harus pake rumus persen '-'
-			//volume = ((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100;
 			volume = bulatkan(((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100);
-			//printf("volume : %f\n",((double)alsa_volume(alsa_handle) / alsa_max_vol) * 100);
-			//printf("volume aktual : %d\n", bulatkan(volume));
+			
+			/* switch hourglass icon */
+			switch(hourglass_icon_index){
+				case 1: hourglass_icon = "\uf252"; hourglass_icon_index = 2; break;
+				case 2: hourglass_icon = "\uf253"; hourglass_icon_index = 3; break;
+				case 3: hourglass_icon = "\uf254"; hourglass_icon_index = 4; break;
+				case 4: hourglass_icon = "\uf251"; hourglass_icon_index = 1; break;
+			}
 		}
 
 		if (counter >= STATUS_REFRESH_RATE_LOW) {
@@ -94,8 +98,8 @@ int main()
 
 		snprintf(status, sizeof(status),
 			// net	    freq		   temp		bat_icn bat_percent	  vol	       up_hrs up_min		datetime
-			" %s \u2502 %0.02fGHz \u2502 \uf2ca %u\u00B0C \u2502 %s  %s \u2502 \uf028 %d \u2502 \uf253 %d:%02d \u2502 \uf073 %s ",
-			network_status(), cpufreq(), cputemp(), battery_icon, battery_status, volume, up_hours, up_minutes, system_time);
+			" %s \u2502 %0.02fGHz \u2502 \uf2ca %u\u00B0C \u2502 %s  %s \u2502 \uf028 %d \u2502 %s %d:%02d \u2502 \uf073 %s ",
+			network_status(), cpufreq(), cputemp(), battery_icon, battery_status, volume, hourglass_icon, up_hours, up_minutes, system_time);
 
 		/* changed root window name */
 		xcb_change_property(connection,

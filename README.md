@@ -20,6 +20,7 @@ Output:
  - Kernel options:
    - `CONFIG_SYSFS`: sysfs file system support [Where most information will be parsed from]
    - `CONFIG_THERMAL_HWMON`: Expose thermal sensors as hwmon device [For getting cpu temps]
+ - Awesome Font
 
 ## Installation
 Installation using **make**:
